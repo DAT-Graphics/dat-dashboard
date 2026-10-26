@@ -21,7 +21,7 @@ function openEditor(p){currentId=p?.id||null;editing=p?structuredClone(p):newPro
 function closeEditor(){$('#projectEditor').hidden=true;document.body.style.overflow='';editing=null;currentId=null}
 function readEditor(){const p=editing;p.title=$('#pTitle').value;p.slug=$('#pSlug').value;p.category=$('#pCategory').value;p.year=$('#pYear').value;p.short=$('#pShort').value;p.challenge=$('#pChallenge').value;p.approach=$('#pApproach').value;p.result=$('#pResult').value;p.published=$('#pPublished').checked;p.featured=$('#pFeatured').checked;p.isDemo=$('#pDemo').checked;collectStoryBlocks();return p}
 function previewProject(){if(!editing)return;$('#liveProjectTitle').textContent=$('#pTitle').value||'Project title';$('#liveProjectCategory').textContent=$('#pCategory').value||'Category';$('#liveProjectCover').src=safeUrl(editing.cover)||'https://dat-graphics.github.io/dat-graphics/uploads/cover-nail-by-eyu.webp'}
-function mediaIcon(url){const ext=(new URL(url,location.href).pathname.split('.').pop()||'').toLowerCase();if(['png','jpg','jpeg','webp','gif','svg'].includes(ext))return `<img src="${url}" loading="lazy" alt="Media asset">`;if(['mp4','webm'].includes(ext))return `<video src="${url}" muted preload="metadata"></video>`;return '<span>PDF DOCUMENT</span>'}
+function mediaIcon(url){const ext=(new URL(url,location.href).pathname.split('.').pop()||'').toLowerCase();if(['png','jpg','jpeg','webp','gif','svg'].includes(ext))return `<img src="${window.DAT_PREVIEW_URL?.(url)||url}" loading="lazy" alt="Media asset">`;if(['mp4','webm'].includes(ext))return `<video src="${url}" muted preload="metadata"></video>`;return '<span>PDF DOCUMENT</span>'}
 function renderGallery(){if(!editing)return;$('#galleryList').innerHTML=(editing.gallery||[]).map((url,i)=>`<div class="gallery-item">${mediaIcon(url)}<button type="button" title="Remove from project" data-index="${i}">✕</button></div>`).join('');$$('#galleryList button').forEach(b=>b.addEventListener('click',()=>{editing.gallery.splice(Number(b.dataset.index),1);renderGallery()}))}
 function renderStoryBlocks(){
  if(!editing)return;
@@ -94,4 +94,4 @@ function bindEvents(){
 }
 window.addEventListener('dat:inquiries',event=>{state.inquiries=event.detail;renderInbox();renderOverview()});
 async function start(){await loadData();$('#loginScreen').hidden=true;$('#adminShell').hidden=false;tab('overview')}
-(async()=>{bindEvents();try{await api('/api/admin/me');await start()}catch{}})();
+(async()=>{bindEvents();try{await api('/api/admin/me');await start()}catch{}finally{window.DAT_BOOT?.ready()}})();
